@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 from datetime import datetime
 import pandas as pd
-import folium
-from streamlit_folium import st_folium
+
+
 from geopy.geocoders import Nominatim
 
 @st.cache_data
