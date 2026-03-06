@@ -2,7 +2,37 @@ import streamlit as st
 import requests
 from datetime import datetime
 import pandas as pd
-#Taxifare front
+import folium
+from streamlit_folium import st_folium
+from geopy.geocoders import Nominatim
+
+@st.cache_data
+def geocode_address(address, geocoder):
+    """Adresse texte → latitude, longitude"""
+    try:
+        location = geocoder.geocode(address + ", New York, NY")
+        return (location.latitude, location.longitude) if location else None
+    except:
+        return None
+
+geocoder = Nominatim(user_agent="taxifare-website")
+
+
+
+
+
+def adresse_to_coords(adresse):
+    geolocator = Nominatim(user_agent="taxi_app")
+    location = geolocator.geocode(adresse + ", New York, NY")
+
+    if location:  # location est un objet Location
+        return (location.latitude, location.longitude)  # tuple (float, float)
+    return None
+
+# Utilisation
+start = adresse_to_coords("Times Square")  # (40.7580, -73.9855)
+
+
 
 
 st.title("🚕 NY Taxi Fare Predictor")
@@ -16,19 +46,32 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("📍 Pickup")
+    pickup_adress = st.text_input("Pickup")
     pickup_date = st.date_input("Date:", format="YYYY/MM/DD")
     pickup_time = st.time_input("Time:")
-    pickup_longitude = st.number_input("Longitude:", value=-73.950655)
-    pickup_latitude = st.number_input("Latitude:", value=40.783282)
+    #pickup_longitude = st.number_input("Longitude:", value=-73.950655)
+    #pickup_latitude = st.number_input("Latitude:", value=40.783282)
+
 
 with col2:
     st.subheader("🎯 Dropoff")
-    dropoff_longitude = st.number_input("Longitude:", value=-73.984365)
-    dropoff_latitude = st.number_input("Latitude:", value=40.769802)
+    dropoff_adress = st.text_input("Dropoff")
+    #dropoff_longitude = st.number_input("Longitude:", value=-73.984365)
+    #dropoff_latitude = st.number_input("Latitude:", value=40.769802)
     passenger_count = st.number_input("Passengers:", min_value=1, max_value=6, value=1)
 
-if st.button("🔮 Predict & Show Route", type="primary"):
+if st.button("🔮 Predict", type="primary"):
     pickup_datetime =f'{pickup_date} {pickup_time}'
+
+
+    # Utilisation
+    start = adresse_to_coords(pickup_adress)  # (40.7580, -73.9855)
+    pickup_latitude = start[0]
+    pickup_longitude = start[1]
+
+    end = adresse_to_coords(dropoff_adress)
+    dropoff_latitude = end[0]
+    dropoff_longitude = end[1]
 
     params = dict(
     pickup_datetime=pickup_datetime,
